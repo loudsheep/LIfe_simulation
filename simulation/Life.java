@@ -2,7 +2,10 @@ package simulation;
 
 
 import genome.Brain;
+import genome.ConnectionGene;
+import genome.NodeGene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 import processing.event.MouseEvent;
 
@@ -589,7 +592,17 @@ public class Life extends PApplet {
     private boolean day = true;
     private boolean dayCH = false;
     private float dayCount = 220;
-    private int dayTime = 2000;
+    private int dayTime = 2000
+
+
+
+
+
+
+
+
+
+            ;
     private float dayDiff = 500f / dayTime;
 
     public void settings() {
@@ -652,16 +665,7 @@ public class Life extends PApplet {
             dayChange();
         }
 
-        if (follow != null && flock.agents.contains(follow)) {
-            follow.debug();
-            fill(255, 0, 0);
-            text("Size: " + follow.size, 10, 20);
-            text("Speed: " + follow.speed, 10, 40);
-            text("Sight range: " + follow.sightRange, 10, 60);
-            text("Hidden nodes in brain: " + (follow.brain.getGenome().getNodes().size() - (follow.inNodes + follow.outNodes)), 10, 80);
-            text("Connections in brain: " + follow.brain.getGenome().getConnections().size(), 10, 100);
-            text("Mutation probability: 1/" + 1f / follow.mutationPropab, 10, 120);
-        }
+
 
 
 //        fill(255, 0, 0);
@@ -684,9 +688,107 @@ public class Life extends PApplet {
         flock.update();
         flock.display();
 
+        if (follow != null && flock.agents.contains(follow)) {
+            follow.debug();
+            fill(255, 0, 0);
+            text("Size: " + follow.size, 10, 20);
+            text("Speed: " + follow.speed, 10, 40);
+            text("Sight range: " + follow.sightRange, 10, 60);
+            text("Hidden nodes in brain: " + (follow.brain.getGenome().getNodes().size() - (follow.inNodes + follow.outNodes)), 10, 80);
+            text("Connections in brain: " + follow.brain.getGenome().getConnections().size(), 10, 100);
+            text("Mutation probability: 1/" + 1f / follow.mutationPropab, 10, 120);
+            image(showBrain(follow, width/10, height/10), 0, 130);
+        }
+
         //System.out.println((100f*(200f / flock.agents.size())));
 
 
+    }
+
+    private PGraphics showBrain(Agent a, float w, float h) {
+        PGraphics pg;
+
+        pg = createGraphics((int)w, (int)h);
+        pg.beginDraw();
+
+        pg.background(dayCount);
+
+        float cell_size = 20;
+        ArrayList<NodeGene> nodes = a.brain.getGenome().getNodes();
+        ArrayList<ConnectionGene> conns = a.brain.getGenome().getConnections();
+
+        if (a.brain.getInNodes() * cell_size * 2 > w)
+            cell_size = w / a.brain.getInNodes() / 2;
+
+        for (ConnectionGene con : conns) {
+            if (con.isEnabeled()) {
+
+                pg.stroke(16, 87, 0);
+                pg.fill(16, 87, 0);
+                float x1 = con.getFrom().getX() * w;
+                float y1 = (float) con.getFrom().getY() * (h);
+                float x2 = con.getTo().getX() * w;
+                float y2 = (float) con.getTo().getY() * (h);
+
+                float x3 = (x1 + x2) / 2;
+                float y3 = (y1 + y2) / 2;
+
+
+//                pg.textSize(12);
+//                pg.textAlign(CENTER);
+//                pg.text(con.getWeight(), x3, y3);
+
+                pg.line(x1, y1, x2, y2);
+            } else {
+                pg.stroke(186, 0, 0);
+                pg.fill(186, 0, 0);
+                float x1 = con.getFrom().getX() * w;
+                float y1 = (float) con.getFrom().getY() * (h);
+                float x2 = con.getTo().getX() * w;
+                float y2 = (float) con.getTo().getY() * (h);
+
+                float x3 = (x1 + x2) / 2;
+                float y3 = (y1 + y2) / 2;
+
+
+//                pg.textSize(12);
+//                pg.textAlign(CENTER);
+//                pg.text(con.getWeight(), x3, y3);
+
+                pg.line(x1, y1, x2, y2);
+            }
+        }
+
+        for (NodeGene n : nodes) {
+            pg.stroke(186, 186, 0);
+            pg.fill(20);
+            float x = n.getX() * w;
+            float y = (float) n.getY() * (h);
+            pg.ellipse(x, y, cell_size, cell_size);
+
+
+//            pg.textSize(cell_size / 2);
+//            pg.textAlign(CENTER);
+//            pg.fill(186, 186, 0);
+//            if (n.getFunc() != null) {
+//                text(n.getFunc().toString(), x, y + cell_size / 4);
+//            }
+
+//            fill(186, 186, 0);
+//            textAlign(CENTER, CENTER);
+//            if (n.getType() == NodeGene.TYPE.INPUT) {
+//                text("I", x, y);
+//            } else if (n.getType() == NodeGene.TYPE.HIDDEN) {
+//                text("H", x, y);
+//            } else {
+//                text("O", x, y);
+//            }
+            //System.out.println(n.getX() + " -- " + n.getY());
+        }
+
+        pg.endDraw();
+
+        return pg;
     }
 
     public void mousePressed() {
